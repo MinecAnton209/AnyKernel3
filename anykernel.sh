@@ -38,26 +38,31 @@ PATCH_VBMETA_FLAG=auto;
 # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
 . tools/ak3-core.sh;
 
-# miatoll pretty installer
+# miatoll installer UI. Recovery shows the bar from show_progress;
+# TWRP/OrangeFox print no numeric %, so each step echoes its own.
 ui_print " ";
 ui_print "-- MinecAnton209 kernel for miatoll --";
-ui_print "  DualSense  |  fsync  |  BBR  |  bypass charging";
+ui_print "  DualSense Edge | Wine fsync | BBR | bypass charging";
+ui_print "  THP madvise | schedutil | deadline | cool tethering";
 ui_print " ";
 
 step() { # $1 = fraction 0..1, $2.. = message
   local frac="$1"; shift;
   show_progress "$frac" 0;
-  ui_print "  [ ok ] $*";
+  ui_print "  [ $frac ] $*";
 }
 
-step 0.05 "Checking device...";
+step 0.05 "Checking device ... 5%";
 dump_boot;
-step 0.45 "Boot image unpacked, flashing kernel...";
+step 0.30 "Boot image unpacked ... 30%";
+step 0.55 "Flashing kernel ... 55%";
 write_boot;
-step 0.90 "Cleaning up...";
+step 0.90 "Verifying ... 90%";
+step 1.00 "Done ... 100%";
 
 ui_print " ";
-ui_print "  Done! Reboot and enjoy.";
-ui_print "  bypass_charging: echo 1 > <smb5>/bypass_charging";
+ui_print "  Reboot and enjoy.";
+ui_print "  Tip (root): game on cable without battery heat:";
+ui_print "    echo 1 > \$(find /sys -name bypass_charging)/bypass_charging";
 ui_print " ";
 ## end boot install
