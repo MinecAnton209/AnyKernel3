@@ -38,31 +38,29 @@ PATCH_VBMETA_FLAG=auto;
 # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
 . tools/ak3-core.sh;
 
-# miatoll installer UI. Recovery shows the bar from show_progress;
-# TWRP/OrangeFox print no numeric %, so each step echoes its own.
-ui_print " ";
-ui_print "-- MinecAnton209 kernel for miatoll --";
-ui_print "  DualSense Edge | Wine fsync | BBR | bypass charging";
-ui_print "  THP madvise | schedutil | deadline | cool tethering";
-ui_print " ";
+# Staged install. The banner/version files above are printed by
+# update-binary itself; here each phase moves the recovery bar via
+# show_progress and echoes one clean line.
 
-step() { # $1 = fraction 0..1, $2.. = message
+phase() { # $1 = fraction, $2.. = label
   local frac="$1"; shift;
-  show_progress "$frac" 0;
-  ui_print "  [ $frac ] $*";
+  show_progress "$frac" 10;
+  ui_print "  $*";
 }
 
-step 0.05 "Checking device ... 5%";
+phase 0.05 "Reading current boot image";
 dump_boot;
-step 0.30 "Boot image unpacked ... 30%";
-step 0.55 "Flashing kernel ... 55%";
+phase 0.30 "Boot image ready";
+phase 0.50 "Writing new kernel";
 write_boot;
-step 0.90 "Verifying ... 90%";
-step 1.00 "Done ... 100%";
+phase 0.85 "Checking boot partition";
+[ -e "$BLOCK" ] || abort "Boot partition missing after flash. Aborting...";
+phase 1.00 "Install complete";
 
 ui_print " ";
-ui_print "  Reboot and enjoy.";
-ui_print "  Tip (root): game on cable without battery heat:";
-ui_print "    echo 1 > \$(find /sys -name bypass_charging)/bypass_charging";
+ui_print "  Reboot to boot into the new kernel.";
+ui_print "  Root tip - play on cable without battery heat:";
+ui_print "    find /sys -name bypass_charging";
+ui_print "    echo 1 > <found-path>  (0 restores charging)";
 ui_print " ";
 ## end boot install
